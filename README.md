@@ -1,4 +1,4 @@
-# ot-2-protocols
+# OT-2 Protocols
 
 Opentrons OT-2 Protocols for Sextonlabs
 
