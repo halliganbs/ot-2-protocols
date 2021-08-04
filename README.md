@@ -1,4 +1,5 @@
 # ot-2-protocols
+
 Opentrons OT-2 Protocols for Sextonlabs
 
 ## Custom Labware
@@ -12,7 +13,7 @@ Contents
 
 ## Protocols
 
-**5520f0_master**
+### 5520f0_master
 
 - Master fix and stain protocol
 - 3 Perkin Elmer 384 well plates
