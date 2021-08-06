@@ -9,7 +9,7 @@ Located in `custom_labware` folder
 Contents
 
 - Perkin Elmer 384 Well Plate
-- TODO: Add Thermo Fisher Matrix Tube Rack
+- Thermo Scientific 96 Matrix Tube Rack
 
 ## Protocols
 
