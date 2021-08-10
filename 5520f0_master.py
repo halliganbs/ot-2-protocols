@@ -148,7 +148,8 @@ def run(ctx):
 
         # Add/Remove 4% PFA (6-8)
         # m300.pick_up_tip()
-        ctx.comment('Adding and Removing 4% PFA')
+    
+    ctx.comment('Adding and Removing 4% PFA')
     
     for i, plate in enumerate(plates, 1):
         ctx.comment(f"Starting Plate {i}")
