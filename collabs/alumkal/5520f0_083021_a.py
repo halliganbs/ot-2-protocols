@@ -26,7 +26,7 @@ def run(ctx):
               'perkinelmer_384_wellplate_145ul', slot)
               for slot in range(1, plates+1)]
     pbs_reservoir = ctx.load_labware('nest_1_reservoir_195ml', 7)
-    reagent_reservoir = ctx.load_labware('nest_12_reservoir_15ml', 8)
+    reagent_reservoir = ctx.load_labware('nest_1_reservoir_195ml', 8)
     waste_reservoir = ctx.load_labware('nest_1_reservoir_195ml', 9)
     tipracks = [ctx.load_labware('opentrons_96_tiprack_300ul',
                                  slot) for slot in range(10, 12)]
@@ -90,16 +90,10 @@ def run(ctx):
         waste_reservoir, 194000, 'multi', 'waste', msg='Empty Waste Reservoir',
         start=0, end=1)
     pbsTrack = VolTracker(pbs_reservoir, 194000, 'multi', msg='Replenish PBS',start=0, end=1)
-    pfaTrack = VolTracker(reagent_reservoir, 14900, 'multi',
-                          start=0, end=4, msg='Replenish 4% PFA')
-    permTrack = VolTracker(reagent_reservoir, 14900,
-                           'multi', start=4, end=8,
-                           msg='Replenish Perm Buffer')
-    # NO ANTIBODIES IN THIS PROTOCOL
-    primaryAntiTrack = VolTracker(reagent_reservoir, 14900,
-                                   'multi', start=8, end=10,
-                                   msg='Replenish Primary Antibody')
-    # secondaryAntiTrack = VolTracker(reagent_reservoir, 14900,
+    pfaTrack = VolTracker(reagent_reservoir, 194000, 'multi',
+                          start=0, end=1, msg='Replenish 4% PFA and Hoe')
+
+   # secondaryAntiTrack = VolTracker(reagent_reservoir, 14900,
     #                                 'multi', start=10, end=12,
     #                                 msg='Replenish Secondary Antibody')
 
