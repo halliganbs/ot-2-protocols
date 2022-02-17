@@ -1,6 +1,8 @@
+# TRIPLE WASH FOR n number of plates
+
 def get_values(*names):
     import json
-    _all_values = json.loads("""{"m300_mount":"left","plates":6,"new_tip":"never","disp_speed":35,"asp_height":0.5}""")
+    _all_values = json.loads("""{"m300_mount":"left","plates":3,"new_tip":"never","disp_speed":35,"asp_height":0.5}""")
     return [_all_values[n] for n in names]
 
 
@@ -11,9 +13,8 @@ metadata = {
     'apiLevel': '2.9'
 }
 
-
 def run(ctx):
-
+    
     [m300_mount, plates, new_tip, disp_speed,
         asp_height] = get_values(  # noqa: F821
         "m300_mount", "plates", "new_tip", "disp_speed",
@@ -25,8 +26,7 @@ def run(ctx):
     plates = [ctx.load_labware(
               'perkinelmer_384_wellplate_145ul', slot)
               for slot in range(1, plates+1)]
-    pbs_reservoir = ctx.load_labware('nest_1_reservoir_195ml', 7)
-    reagent_reservoir = ctx.load_labware('nest_12_reservoir_15ml', 8)
+    pbs_reservoir = ctx.load_labware('nest_1_reservoir_195ml', 8)
     waste_reservoir = ctx.load_labware('nest_1_reservoir_195ml', 9)
     tipracks = [ctx.load_labware('opentrons_96_tiprack_300ul',
                                  slot) for slot in range(10, 12)]
@@ -67,7 +67,7 @@ def run(ctx):
             it will remove it from the dictionary and iterate
             to the next well which will act as the reservoir.'''
             well = next(iter(self.labware_wells))
-            if self.labware_wells[well] + vol >= 14800:
+            if self.labware_wells[well] + vol >= self.well_vol:
                 del self.labware_wells[well]
                 if len(self.labware_wells) < 1:
                     ctx.pause(self.msg)
@@ -86,23 +86,10 @@ def run(ctx):
             return well
 
     # Volume Trackers for Multi-well Reagents
-    wasteTrack = VolTracker(
-        waste_reservoir, 194000, 'multi', 'waste', msg='Empty Waste Reservoir',
-        start=0, end=1)
-    pbsTrack = VolTracker(pbs_reservoir, 194000, 'multi', msg='Replenish PBS',start=0, end=1)
-    pfaTrack = VolTracker(reagent_reservoir, 14900, 'multi',
-                          start=0, end=4, msg='Replenish 4% PFA')
-    permTrack = VolTracker(reagent_reservoir, 14900,
-                           'multi', start=4, end=8,
-                           msg='Replenish Perm Buffer')
-    # NO ANTIBODIES IN THIS PROTOCOL
-    primaryAntiTrack = VolTracker(reagent_reservoir, 14900,
-                                   'multi', start=8, end=10,
-                                   msg='Replenish Primary Antibody')
-    # secondaryAntiTrack = VolTracker(reagent_reservoir, 14900,
-    #                                 'multi', start=10, end=12,
-    #                                 msg='Replenish Secondary Antibody')
-
+    wasteTrack = VolTracker(waste_reservoir, 194000, 'multi', 'waste',
+                            msg='Empty Waste Reservoir', start=0, end=1)
+    pbsTrack = VolTracker(pbs_reservoir, 194000, 'multi', start=0, end=1,
+                          msg='Replenish PBS')
     # Protocol Steps
 
     # Add/Remove PBS
@@ -120,58 +107,28 @@ def run(ctx):
         # m300.drop_tip()
 
     for i, plate in enumerate(plates, 1):
-        ctx.comment(f"Starting Plate {i}")
+        ctx.comment(f"Starting Plate {i} wash 1")
         dest_wells = [plate.rows()[i][col] for col in range(cols) for i in
                       range(2)][:cols*2]
-
-        # Remove Media (1)
-        ctx.comment('Removing Media')
-        if not m300.has_tip:
-            m300.pick_up_tip()
-        for well in dest_wells:
-            m300.transfer(45, well.bottom(asp_height),
-                          wasteTrack.tracker(45), new_tip='never')
-   
+        
+        add_remove_pbs(dest_wells, 50)
+        
     for i, plate in enumerate(plates, 1):
-        ctx.comment(f"Starting Plate {i}")
+        ctx.comment(f"Starting Plate {i} wash 2")
         dest_wells = [plate.rows()[i][col] for col in range(cols) for i in
                       range(2)][:cols*2]
-        # Add/Remove 4% PFA (6-8)
-        # m300.pick_up_tip()
-        ctx.comment('Adding and Removing 4% PFA')
-        for well in dest_wells:
-            m300.transfer(50, pfaTrack.tracker(50), well, new_tip='never')
         # m300.drop_tip()
-
-    ctx.delay(minutes=20, msg='Pausing for 20 minutes...')
-
-    for i, plate in enumerate(plates, 1):
-        ctx.comment(f"Starting Plate {i}")
-        dest_wells = [plate.rows()[i][col] for col in range(cols) for i in
-                      range(2)][:cols*2]
-        # m300.pick_up_tip()
-        for well in dest_wells:
-            m300.transfer(50, well.bottom(asp_height),
-                          wasteTrack.tracker(50), new_tip='never')
-        # m300.drop_tip()
- 
-
-    for i, plate in enumerate(plates, 1):
-        ctx.comment(f"Starting Plate {i}")
-        dest_wells = [plate.rows()[i][col] for col in range(cols) for i in
-                      range(2)][:cols*2]
-        # Add/Remove PBS (12-13)
+        # Add/Remove PBS (2-3)
         add_remove_pbs(dest_wells, 50)
 
     for i, plate in enumerate(plates, 1):
-        ctx.comment(f"Starting Plate {i}")
+        ctx.comment(f"Starting Plate {i} wash 3")
         dest_wells = [plate.rows()[i][col] for col in range(cols) for i in
                       range(2)][:cols*2]
-        ctx.comment('Adding Final PBS')
-        for well in dest_wells:
-            m300.aspirate(50, pbsTrack.tracker(50))
-            m300.dispense(50, well)
-        if new_tip == "always":
-            m300.drop_tip()
-    if new_tip == "never":
-        m300.drop_tip()
+        # m300.drop_tip()
+        # Add/Remove PBS (2-3)
+        add_remove_pbs(dest_wells, 50)
+
+    m300.drop_tip()
+    m300.home()
+
