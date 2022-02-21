@@ -28,7 +28,7 @@ def run(protocol_context):
     # changed for 384 well plates
     # plate = protocol_context.load_labware(
     #     plate_type, '3')
-    plates = [protocol_context.load_labware(
+    plate = [protocol_context.load_labware(
               'perkinelmer_384_wellplate_145ul', slot)
               for slot in range(1, plates+1)]
     # REPLACED BY 5520f0 tips
@@ -46,8 +46,11 @@ def run(protocol_context):
     tiprack = [protocol_context.load_labware('opentrons_96_tiprack_300ul',
                                  slot) for slot in ['1', '4']]
 
-    pipette = protocol_context.load_instrument(
-        pipette_type, mount='left', tip_racks=tiprack)
+    # pipette = protocol_context.load_instrument(
+    #     pipette_type, mount='left', tip_racks=tiprack)
+
+    pipette = protocol_context.load_insturment(
+        'p300_multi_gen2', mount='left', tip_racks=tiprack)
 
     transfer_volume = total_mixing_volume/dilution_factor
     diluent_volume = total_mixing_volume - transfer_volume
