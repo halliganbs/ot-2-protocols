@@ -31,16 +31,20 @@ def run(protocol_context):
     plates = [protocol_context.load_labware(
               'perkinelmer_384_wellplate_145ul', slot)
               for slot in range(1, plates+1)]
-    if 'p20' in pipette_type:
-        tip_name = 'opentrons_96_filtertiprack_20ul' if tip_type \
-            else 'opentrons_96_tiprack_20ul'
-    else:
-        tip_name = 'opentrons_96_filtertiprack_200ul' if tip_type \
-            else 'opentrons_96_tiprack_300ul'
-    tiprack = [
-        protocol_context.load_labware(tip_name, slot)
-        for slot in ['1', '4']
-    ]
+    # REPLACED BY 5520f0 tips
+    # if 'p20' in pipette_type:
+    #     tip_name = 'opentrons_96_filtertiprack_20ul' if tip_type \
+    #         else 'opentrons_96_tiprack_20ul'
+    # else:
+    #     tip_name = 'opentrons_96_filtertiprack_200ul' if tip_type \
+    #         else 'opentrons_96_tiprack_300ul'
+    # tiprack = [
+    #     protocol_context.load_labware(tip_name, slot)
+    #     for slot in ['1', '4']
+    # ]
+
+    tiprack = [protocol_context.load_labware('opentrons_96_tiprack_300ul',
+                                 slot) for slot in ['1', '4']]
 
     pipette = protocol_context.load_instrument(
         pipette_type, mount='left', tip_racks=tiprack)
