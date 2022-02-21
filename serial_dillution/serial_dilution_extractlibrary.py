@@ -1,6 +1,6 @@
 def get_values(*names):
     import json
-    _all_values = json.loads("""{"pipette_type":"p300_multi","tip_type":0,"trough_type":"nest_12_reservoir_15ml","plate_type":"nest_96_wellplate_200ul_flat","dilution_factor":2,"num_of_dilutions":10,"total_mixing_volume":5,"tip_use_strategy":"never"}""")
+    _all_values = json.loads("""{"plates":"4","pipette_type":"p300_multi","tip_type":0,"trough_type":"nest_12_reservoir_15ml","plate_type":"perkinelmer_384_wellplate_145ul","dilution_factor":2,"num_of_dilutions":10,"total_mixing_volume":5,"tip_use_strategy":"never"}""")
     return [_all_values[n] for n in names]
 
 
@@ -13,10 +13,10 @@ metadata = {
 
 
 def run(protocol_context):
-    [pipette_type, tip_type, trough_type, plate_type,
+    [plates, pipette_type, tip_type, trough_type, plate_type,
      dilution_factor, num_of_dilutions, total_mixing_volume,
         tip_use_strategy] = get_values(  # noqa: F821
-            'pipette_type', 'tip_type', 'trough_type', 'plate_type',
+            'plates','pipette_type', 'tip_type', 'trough_type', 'plate_type',
             'dilution_factor', 'num_of_dilutions',
             'total_mixing_volume', 'tip_use_strategy'
         )
@@ -25,8 +25,12 @@ def run(protocol_context):
     trough = protocol_context.load_labware(
         trough_type, '2')
     liquid_trash = trough.wells()[-1]
-    plate = protocol_context.load_labware(
-        plate_type, '3')
+    # changed for 384 well plates
+    # plate = protocol_context.load_labware(
+    #     plate_type, '3')
+    plates = [protocol_context.load_labware(
+              'perkinelmer_384_wellplate_145ul', slot)
+              for slot in range(1, plates+1)]
     if 'p20' in pipette_type:
         tip_name = 'opentrons_96_filtertiprack_20ul' if tip_type \
             else 'opentrons_96_tiprack_20ul'
