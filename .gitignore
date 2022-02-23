@@ -130,3 +130,5 @@ dmypy.json
 
 # opentrons config file
 .bundle_beta
+
+.DS_Store
